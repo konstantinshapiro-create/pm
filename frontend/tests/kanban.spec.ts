@@ -39,3 +39,21 @@ test("moves a card between columns", async ({ page }) => {
   await page.mouse.up();
   await expect(targetColumn.getByTestId("card-card-1")).toBeVisible();
 });
+
+test("reorders a card within a column via keyboard", async ({ page }) => {
+  await page.goto("/");
+  const column = page.getByTestId("column-col-backlog");
+  const card = column.getByTestId("card-card-1");
+
+  await card.focus();
+  await page.keyboard.press("Space");
+  await page.waitForTimeout(200);
+  await page.keyboard.press("ArrowDown");
+  await page.waitForTimeout(200);
+  await page.keyboard.press("Space");
+
+  const cardTestIds = await column
+    .locator('[data-testid^="card-"]')
+    .evaluateAll((nodes) => nodes.map((node) => node.getAttribute("data-testid")));
+  expect(cardTestIds).toEqual(["card-card-2", "card-card-1"]);
+});
